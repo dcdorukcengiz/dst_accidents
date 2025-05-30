@@ -12,8 +12,7 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as mdates
 
 
-home_directory = "/Users/EzgilovesDoruk/Desktop/education_health/"
-combined_accidents_cleaner = pd.read_parquet(f"{home_directory}combined_accidents_cleaner_table.parquet")
+combined_accidents_cleaner = pd.read_parquet(f"data/combined_accidents_cleaner_table.parquet")
 
 
 num_weeks_diff = 5
@@ -61,7 +60,7 @@ assign(**{"placebo_two_weeks_after_change": lambda x:
 assign(**{"accident_time": lambda x: x["kazatarihi_full2"].dt.time})
 
 )
-federal_holidays = pd.read_parquet(f"{home_directory}federal_holidays_turkey_table.parquet").rename(columns = {"date": "kazatarihi_date"})
+federal_holidays = pd.read_parquet(f"data/federal_holidays_turkey_table.parquet").rename(columns = {"date": "kazatarihi_date"})
 
 
 start_hour = 7
@@ -73,7 +72,7 @@ end_time = time(end_hour,0,0)
 combined_accidents_cleaner_w_dst_holidays = (combined_accidents_cleaner_w_dst.
 assign(**{"kazatarihi_date": lambda x: x["kazatarihi_full"].dt.strftime("%Y-%m-%d")}).
 merge(federal_holidays, on = ["kazatarihi_date"], how = "left")
-#.query("@start_time <= accident_time <= @end_time")
+.query("@start_time <= accident_time <= @end_time")
 .assign(**{"holiday": lambda x: x["holiday"].fillna("no_holiday")})
 #.query("holiday != holiday")
 )

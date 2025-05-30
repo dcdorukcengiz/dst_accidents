@@ -1,5 +1,3 @@
-%reset -f
-
 import numpy as np
 import pandas as pd
 import janitor
@@ -15,7 +13,7 @@ import matplotlib.dates as mdates
 combined_accidents_cleaner = pd.read_parquet(f"data/combined_accidents_cleaner_table.parquet")
 
 
-num_weeks_diff = 2
+num_weeks_diff = 1
 combined_accidents_cleaner_w_dst = (combined_accidents_cleaner.
 assign(**{"accident_year_month": lambda x: x["kazatarihi_full"].dt.strftime("%Y-%m")}).
 assign(**{"two_weeks_before_after_change": lambda x: 
@@ -65,7 +63,7 @@ assign(**{"accident_time": lambda x: x["kazatarihi_full"].dt.time})
 #end_hour = 8
 
 
-hour_range = 1
+hour_range = 2
 all_estimates = pd.DataFrame()
 for start_hour in range(0, 24, hour_range):
 #for start_hour in range(16, 18, 1):
@@ -127,6 +125,7 @@ for start_hour in range(0, 24, hour_range):
 #    fit = pf.fepois("total_accidents ~ two_weeks_after_change + pre_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
     fit = pf.feols("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
     fit.summary()
+    #Note that we are multiplying the coefficient by -1 because we are interested in the impact of changing hours, which took place in pre.
     temp = pd.DataFrame({
         "treat_coefficient": [-float(fit.coef()["post_treatment"])],
         "treat_se": [float(fit.se()["post_treatment"])],
@@ -147,7 +146,7 @@ errors = 2 * all_estimates['treat_se']
 
 
 plt.figure(figsize=(15, 6))  # Adjust figure size for better readability if needed
-plt.bar(all_estimates['start_time'], all_estimates['treat_coefficient'] * 100, yerr=errors * 100, capsize=3)
+plt.bar(all_estimates['start_time'], all_estimates['treat_coefficient'] , yerr=errors , capsize=3)
 
 # Add labels and title
 plt.xlabel('Hour')
@@ -227,8 +226,9 @@ for start_hour in range(0, 24, hour_range):
 
 
 
-#    fit = pf.fepois("total_accidents ~ two_weeks_after_change + pre_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
-    fit = pf.feols("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
+    fit = pf.fepois("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
+#    fit = pf.feols("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
+    #fit = pf.fepois("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
     fit.summary()
     temp = pd.DataFrame({
         "treat_coefficient": [-float(fit.coef()["post_treatment"])],
@@ -250,7 +250,7 @@ errors = 2 * all_estimates['treat_se']
 
 
 plt.figure(figsize=(15, 6))  # Adjust figure size for better readability if needed
-plt.bar(all_estimates['start_time'], all_estimates['treat_coefficient'] * 100, yerr=errors * 100, capsize=3)
+plt.bar(all_estimates['start_time'], all_estimates['treat_coefficient'], yerr=errors, capsize=3)
 
 # Add labels and title
 plt.xlabel('Hour')
@@ -331,7 +331,7 @@ for start_hour in range(0, 24, hour_range):
 
 
 
-#    fit = pf.fepois("total_accidents ~ two_weeks_after_change + pre_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
+    fit = pf.fepois("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
     fit = pf.feols("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
     fit.summary()
     temp = pd.DataFrame({
@@ -371,6 +371,8 @@ ax = plt.gca()  # Get the current axis
 
 plt.savefig(f"figures/impact_of_changing_time_st_first_{num_weeks_diff}_weeks_feols_{hour_range}_hours.png", dpi = 300)
 
+fit = pf.fepois("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
+fit = pf.feols("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili + year", data = all_zoomed_in_data_agg, vcov={"CRV1": "kaza_ili"})
 
 
 
