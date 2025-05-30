@@ -8,9 +8,9 @@ import pyfixest as pf
 from datetime import time
 
 
-home_directory = "/Users/EzgilovesDoruk/Desktop/education_health/"
-accidents_2019 = pd.read_excel(f"{home_directory}KADİR HAS ÜNİVERSİTESİ KAZA ARAÇ.xlsx", sheet_name = 'KAZA 2019')
-accidents_2013_2019 = pd.read_excel(f"{home_directory}KADİR HAS ÜNİVERSİTESİ KAZA ARAÇ.xlsx", sheet_name = 'KAZA 2013-2018')
+
+accidents_2019 = pd.read_excel(f"data/KADİR HAS ÜNİVERSİTESİ KAZA ARAÇ.xlsx", sheet_name = 'KAZA 2019')
+accidents_2013_2019 = pd.read_excel(f"data/KADİR HAS ÜNİVERSİTESİ KAZA ARAÇ.xlsx", sheet_name = 'KAZA 2013-2018')
 
 accidents_2019 = accidents_2019.rename(columns = { 
                                 "KazaAyı": "Kaza_Ayı", 
@@ -34,14 +34,27 @@ combined_accidents_cleaner = (combined_accidents.
     
     )
 
-combined_accidents_cleaner.to_parquet(f"{home_directory}combined_accidents_cleaner_table.parquet", index = False)
-combined_accidents_cleaner = pd.read_parquet(f"{home_directory}combined_accidents_cleaner_table.parquet")
+combined_accidents_cleaner.to_parquet(f"data/combined_accidents_cleaner_table.parquet", index = False)
+combined_accidents_cleaner = pd.read_parquet(f"data/combined_accidents_cleaner_table.parquet")
 
 
 total_car_accidents_per_year = (combined_accidents_cleaner.groupby(["kazayili"]).agg(total_accidents_per_year = ('kazaid', 'count')).reset_index())
 
-plt.plot(total_car_accidents_per_year["kazayili"], total_car_accidents_per_year["total_accidents_per_year"], color = "orange")
-plt.ylim(ymin=100_000)  # Sets the minimum y-value to 0
+fig, ax = plt.subplots(figsize=(8, 4))
+
+ax.plot(
+    total_car_accidents_per_year["kazayili"],
+    total_car_accidents_per_year["total_accidents_per_year"],
+    color="orange",
+    marker="o",       # Adds dots
+    markersize=5,     # Optional: controls dot size
+    linewidth=2       # Optional: thicker line
+)
+
+ax.set_ylim(bottom=100_000)
+
+plt.tight_layout()
+fig.savefig("figures/all_accidents_trend.pdf")
 
 num_weeks_diff = 4
 combined_accidents_cleaner_w_dst = (combined_accidents_cleaner.
@@ -257,7 +270,7 @@ pf.feols("total_accidents ~ two_weeks_after_change + post_treatment | kaza_ili +
 
 #################            Pedestrian accidents       ##############################
 
-pedestrian_accidents = pd.read_excel(f"{home_directory}KADİR HAS ÜNİVERSİTESİ_YOLCU YAYA.xlsx", sheet_name=None)
+pedestrian_accidents = pd.read_excel(f"data/KADİR HAS ÜNİVERSİTESİ_YOLCU YAYA.xlsx", sheet_name=None)
 pedestrian_accidents.pop("VERİ BİLGİSİ", None)
 pedestrian_accidents["YOYA 2019"] = pedestrian_accidents["YOYA 2019"].rename(columns = {"KazaYili": "KazaYılı"})
 pedestrian_accidents_all_together = pd.concat(pedestrian_accidents, ignore_index = True).rename(columns = { 
