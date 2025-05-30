@@ -7,7 +7,7 @@ The folder structure is pretty straightforward:
 
 ### 📁 Repository Structure: `DST_accidents`
 
-DST_accidents/
+DST_accidents/  
 ├── codes/ # Scripts for data processing, analysis, and modeling  
 ├── data/ # Raw and cleaned datasets (often excluded or sampled for GitHub)  
 ├── figures/ # Generated figures and visualizations  
