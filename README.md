@@ -5,12 +5,11 @@ Currently, there are many scratch paper like .py scripts, but the relevant ones 
 
 The folder structure is pretty straightforward: 
 DST_accidents/
-├── codes/          # Scripts for data processing, analysis, and modeling
-├── data/           # Raw and cleaned datasets (often excluded or sampled for GitHub)
-├── figures/        # Generated figures and visualizations
-├── tables/         # Output tables (e.g., regression results, summary stats)
-├── writing/        # Drafts, notes, and manuscript files
-├── output/         # Final outputs (combined datasets, logs, reports, etc.)
-└── README.md       # Repository description and usage instructions
-
+├── codes/ # Scripts for data processing, analysis, and modeling
+├── data/ # Raw and cleaned datasets (often excluded or sampled for GitHub)
+├── figures/ # Generated figures and visualizations
+├── tables/ # Output tables (e.g., regression results, summary stats)
+├── writing/ # Drafts, notes, and manuscript files
+├── output/ # Final outputs (combined datasets, logs, reports, etc.)
+└── README.md # Repository description and usage instructions
 
