@@ -1,5 +1,3 @@
-%reset -f
-
 import numpy as np
 import pandas as pd
 import janitor
@@ -12,8 +10,7 @@ from rdrobust import rdrobust,rdbwselect,rdplot
 import matplotlib.ticker as ticker  
 
 
-home_directory = "/Users/EzgilovesDoruk/Desktop/education_health/"
-combined_accidents_cleaner = pd.read_parquet(f"{home_directory}combined_accidents_cleaner_table.parquet")
+combined_accidents_cleaner = pd.read_parquet(f"data/combined_accidents_cleaner_table.parquet")
 
 #Monthly Accidents
 
