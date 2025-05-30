@@ -12,8 +12,7 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as mdates
 
 
-home_directory = "/Users/EzgilovesDoruk/Desktop/education_health/"
-combined_accidents_cleaner = pd.read_parquet(f"{home_directory}combined_accidents_cleaner_table.parquet")
+combined_accidents_cleaner = pd.read_parquet(f"data/combined_accidents_cleaner_table.parquet")
 
 
 num_weeks_diff = 2
@@ -163,7 +162,7 @@ plt.tight_layout() # Adjust layout to prevent labels from overlapping
 ax = plt.gca()  # Get the current axis
 #ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f%%'))
 
-plt.savefig(f"{home_directory}impact_of_changing_time_dst_st_first_{num_weeks_diff}_weeks_feols_{hour_range}_hours.png", dpi = 300)
+plt.savefig(f"figures/impact_of_changing_time_dst_st_first_{num_weeks_diff}_weeks_feols_{hour_range}_hours.png", dpi = 300)
 
 
 #########      DST separate      ################
@@ -266,7 +265,7 @@ plt.tight_layout() # Adjust layout to prevent labels from overlapping
 ax = plt.gca()  # Get the current axis
 #ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f%%'))
 
-plt.savefig(f"{home_directory}impact_of_changing_time_dst_first_{num_weeks_diff}_weeks_feols_{hour_range}_hours.png", dpi = 300)
+plt.savefig(f"figures/impact_of_changing_time_dst_first_{num_weeks_diff}_weeks_feols_{hour_range}_hours.png", dpi = 300)
 
 
 
@@ -370,7 +369,7 @@ plt.tight_layout() # Adjust layout to prevent labels from overlapping
 ax = plt.gca()  # Get the current axis
 #ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f%%'))
 
-plt.savefig(f"{home_directory}impact_of_changing_time_st_first_{num_weeks_diff}_weeks_feols_{hour_range}_hours.png", dpi = 300)
+plt.savefig(f"figures/impact_of_changing_time_st_first_{num_weeks_diff}_weeks_feols_{hour_range}_hours.png", dpi = 300)
 
 
 

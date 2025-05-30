@@ -1,4 +1,3 @@
-%reset -f
 
 import numpy as np
 import pandas as pd
@@ -13,8 +12,7 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as mdates
 
 
-home_directory = "/Users/EzgilovesDoruk/Desktop/education_health/"
-combined_accidents_cleaner = pd.read_parquet(f"{home_directory}combined_accidents_cleaner_table.parquet")
+combined_accidents_cleaner = pd.read_parquet(f"data/combined_accidents_cleaner_table.parquet")
 
 #Monthly Accidents
 
@@ -57,7 +55,7 @@ plt.show()
 ### Sunrise and sunset hours
 
 #When there is DST-ST change 
-df = pd.read_parquet(f"{home_directory}city_sunrise_sunset_table.parquet")
+df = pd.read_parquet(f"data/city_sunrise_sunset_table.parquet")
 df = (df.
 assign(**{"sunrise_date": lambda x: x["date"].astype(str) + "-" + x["sunrise"]}).
 assign(**{"sunset_date": lambda x: x["date"].astype(str) + "-" + x["sunset"]}).
@@ -101,7 +99,7 @@ plt.gca().yaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 
 plt.tight_layout()
 
-
+plt.savefig("figures/daylight_saving_times.pdf")
 
 
 
