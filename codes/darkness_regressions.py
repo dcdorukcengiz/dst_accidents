@@ -71,11 +71,12 @@ balanced_data_w_accidents = (balanced_data.
     assign(**{"day_of_the_week": lambda x: x["hourly_date"].dt.dayofweek}).
     assign(**{"monthly_year": lambda x: x["hourly_date"].dt.strftime("%Y-%m")}).
     assign(**{"month": lambda x: x["hourly_date"].dt.month}).
-    assign(**{"week": lambda x: x["hourly_date"].dt.isocalendar().week})
+    assign(**{"week": lambda x: x["hourly_date"].dt.isocalendar().week}).
+    assign(**{"day": lambda x: x["hourly_date"].dt.day})
 )
 
 balanced_data_w_accidents['panel_id'] = balanced_data_w_accidents.groupby(["hourly_date_sans_year", "kaza_ili"]).ngroup()
-balanced_data_w_accidents['day_of_the_week_hour_city'] = balanced_data_w_accidents.groupby(["day_of_the_week", "kaza_ili", "month", "hour"]).ngroup()
+balanced_data_w_accidents['day_of_the_week_hour_city'] = balanced_data_w_accidents.groupby(["day_of_the_week", "kaza_ili", "hour", "month"]).ngroup()
 balanced_data_w_accidents['day_of_the_week_hour_week_city'] = balanced_data_w_accidents.groupby(["day_of_the_week", "kaza_ili", "week", "hour"]).ngroup()
 
 
@@ -84,15 +85,16 @@ balanced_data_w_accidents["panel_id"].nunique() * balanced_data_w_accidents["kaz
 balanced_data_w_accidents_w_holidays = (balanced_data_w_accidents.
     merge(federal_holidays.assign(**{"date": lambda x: pd.to_datetime(x["kazatarihi_date"]).dt.date})[["date", "holiday"]].drop_duplicates(), on = ["date"], 
     how = "left").
-    assign(**{"holiday": lambda x: x["holiday"].fillna('no_holiday')})
+    assign(**{"holiday": lambda x: x["holiday"].fillna('no_holiday')}).
+    assign(**{"day_squared": lambda x: x["day"]**2})
 
 )
 
-fitted_model = pf.fepois("total_accidents ~ light_share | panel_id + year + day_of_the_week + month" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and year > 2016"))
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id + year + day_of_the_week_hour_city" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday'"))
 fitted_model.vcov("HC1").summary()
 fitted_model.summary()
 
-fitted_model = pf.fepois("total_accidents ~ light_share | day_of_the_week_hour_week_city + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and year > 2016"))
+fitted_model = pf.fepois("total_accidents ~ light_share + day + day_squared | day_of_the_week_hour_city + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday'"))
 fitted_model.vcov("HC1").summary()
 fitted_model.vcov({"CRV1": "kaza_ili"}).summary()
 
@@ -100,10 +102,10 @@ fitted_model = pf.feols("total_accidents ~ light_share | panel_id + year + day_o
 fitted_model.summary()
 
 
-zz = 6
+zz = 7
 
-fitted_model = pf.feols("total_accidents ~ light_share | day_of_the_week_hour_city + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and year > 2016 and hour == @zz and month != 3 and month !=4 and month != 10 and month != 11"))
-fitted_model.vcov("HC1").summary()
+fitted_model = pf.fepois("total_accidents ~ light_share | day_of_the_week_hour_week_city + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour == @zz and month != 3 and month !=4 and month != 10 and month != 11"))
+fitted_model.vcov({"CRV1": "kaza_ili"}).summary()
 
 fitted_model = pf.feols("total_accidents ~ light_share | day_of_the_week_hour_city + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and year < 2016 and hour == @zz and month != 3 and month !=4 and month != 10 and month != 11"))
 fitted_model.vcov("HC1").summary()
