@@ -72,7 +72,8 @@ balanced_data_w_accidents = (balanced_data.
     assign(**{"monthly_year": lambda x: x["hourly_date"].dt.strftime("%Y-%m")}).
     assign(**{"month": lambda x: x["hourly_date"].dt.month}).
     assign(**{"week": lambda x: x["hourly_date"].dt.isocalendar().week}).
-    assign(**{"day": lambda x: x["hourly_date"].dt.day})
+    assign(**{"day": lambda x: x["hourly_date"].dt.day}).
+    assign(**{"year_half": lambda x: x["month"] <= 6})
 )
 
 balanced_data_w_accidents['panel_id'] = balanced_data_w_accidents.groupby(["hourly_date_sans_year", "kaza_ili"]).ngroup()
@@ -107,17 +108,49 @@ fitted_model.vcov("HC1").summary()
 fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and (month < 3 or month > 11)"))
 fitted_model.vcov("HC1").summary()
 
-
-
-fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and  hour < 12"))
+#Wrong mindset: Where does the estimation come from? Not from a ton of places here. It does not come from same hour, same place, different level of light exposure.
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and (month > 4 and month < 10) and year > 2016"))
 fitted_model.vcov("HC1").summary()
-fitted_model.vcov({"CRV1": "kaza_ili"}).summary()
-
-fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour > 12"))
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and (month > 4 and month < 10) and year < 2016"))
 fitted_model.vcov("HC1").summary()
-fitted_model.vcov({"CRV1": "kaza_ili"}).summary()
+
+#Correct mindset: Same hour, same place. Majority of estimation come from daylight saving stuff
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and (month < 3 or month > 11)"))
+fitted_model.vcov("HC1").summary()
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
 
 
+
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday'"))
+fitted_model.vcov("HC1").summary()
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
+
+
+
+
+
+
+
+#The morning effect is strange. It is positive: more light more accidents
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and  hour < 12 and (month < 3 or month > 11)"))
+fitted_model.vcov("HC1").summary()
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
+
+#The afternoon effect is good. It is negative: more light less accidents
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour > 12  and (month < 3 or month > 11) "))
+fitted_model.vcov("HC1").summary()
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
+
+#If we focus on summer months, as expected, the estimates are very imprecise
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour < 12  and (month > 4 and month < 10) "))
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
+
+# If we look at the entire year, since the majority of variation comes from daylight saving, the estimates follow earlier findings. 
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour < 12  "))
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
+
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour > 12  "))
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
 
 fitted_model = pf.fepois("total_accidents ~ light_share  | panel_id2 + year_cat" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and month != 3 and month != 4 and month != 10 and month != 11"))
 fitted_model.vcov("HC1").summary()
