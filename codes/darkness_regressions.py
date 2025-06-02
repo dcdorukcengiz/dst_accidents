@@ -79,6 +79,9 @@ balanced_data_w_accidents['panel_id'] = balanced_data_w_accidents.groupby(["hour
 balanced_data_w_accidents['day_of_the_week_hour_city'] = balanced_data_w_accidents.groupby(["day_of_the_week", "kaza_ili", "hour", "month"]).ngroup()
 balanced_data_w_accidents['day_of_the_week_hour_week_city'] = balanced_data_w_accidents.groupby(["day_of_the_week", "kaza_ili", "week", "hour"]).ngroup()
 
+balanced_data_w_accidents['panel_id2'] = balanced_data_w_accidents.groupby(["week", "day_of_the_week",  "hour", "kaza_ili"]).ngroup()
+
+
 
 balanced_data_w_accidents["panel_id"].nunique() * balanced_data_w_accidents["kaza_ili"].nunique()
 
@@ -90,7 +93,33 @@ balanced_data_w_accidents_w_holidays = (balanced_data_w_accidents.
 
 )
 
-fitted_model = pf.fepois("total_accidents ~ light_share | panel_id + year + day_of_the_week_hour_city" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday'"))
+balanced_data_w_accidents_w_holidays_2017_onwards = balanced_data_w_accidents_w_holidays.query("year > 2016").copy()
+balanced_data_w_accidents_w_holidays["year_cat"] = balanced_data_w_accidents_w_holidays["year"].astype('category')
+balanced_data_w_accidents_w_holidays_2017_onwards["year_cat"] = balanced_data_w_accidents_w_holidays_2017_onwards["year"].astype('category')
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id + year + day_of_the_week" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday'"))
+fitted_model.vcov("HC1").summary()
+fitted_model.summary()
+
+#Estimation is possible for two reasons: 1- minute differences in sunrise and sunset; 2- earlier daylight saving.
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and month != 3 and month != 4 and month != 10 and month != 11"))
+fitted_model.vcov("HC1").summary()
+
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and (month < 3 or month > 11)"))
+fitted_model.vcov("HC1").summary()
+
+
+
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and  hour < 12"))
+fitted_model.vcov("HC1").summary()
+fitted_model.vcov({"CRV1": "kaza_ili"}).summary()
+
+fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour > 12"))
+fitted_model.vcov("HC1").summary()
+fitted_model.vcov({"CRV1": "kaza_ili"}).summary()
+
+
+
+fitted_model = pf.fepois("total_accidents ~ light_share  | panel_id2 + year_cat" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and month != 3 and month != 4 and month != 10 and month != 11"))
 fitted_model.vcov("HC1").summary()
 fitted_model.summary()
 
