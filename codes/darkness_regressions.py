@@ -119,10 +119,15 @@ fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , da
 fitted_model.vcov("HC1").summary()
 fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
 
+fitted_model = pf.fepois("total_accidents ~ light_share  + year:C(kaza_ili) + year:C(hour) | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and (month < 3 or month > 11) and hour > 12"))
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
 
 
-fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday'"))
-fitted_model.vcov("HC1").summary()
+fitted_model = pf.fepois("total_accidents ~ light_share  + year:C(kaza_ili) + year:C(hour) | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and (month > 4 or month < 10) and hour < 12"))
+fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
+
+
+fitted_model = pf.fepois("total_accidents ~ light_share  + year:C(kaza_ili) | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday'"))
 fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
 
 
@@ -136,10 +141,15 @@ fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , da
 fitted_model.vcov("HC1").summary()
 fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
 
+fitted_model = pf.fepois("total_accidents ~ light_share + year:C(kaza_ili) | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.assign(**{"year2": lambda x: x["year"]**2}).query("holiday == 'no_holiday' and  hour < 12 and (month > 4 or month < 10)"))
+fitted_model.vcov({"CRV1": "year + kaza_ili"}).summary()
+
+
+
 #The afternoon effect is good. It is negative: more light less accidents
 fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour > 12  and (month < 3 or month > 11) "))
 fitted_model.vcov("HC1").summary()
-fitted_model.vcov({"CRV1": "year_half + kaza_ili"}).summary()
+fitted_model.vcov({"CRV1": "hour + kaza_ili"}).summary()
 
 #If we focus on summer months, as expected, the estimates are very imprecise
 fitted_model = pf.fepois("total_accidents ~ light_share | panel_id2 + year" , data = balanced_data_w_accidents_w_holidays.query("holiday == 'no_holiday' and hour < 12  and (month > 4 and month < 10) "))
