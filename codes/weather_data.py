@@ -9,9 +9,7 @@ import pandas as pd
 import requests
 import time
 
-home_directory = "/Users/EzgilovesDoruk/Desktop/education_health/"
-
-with open(f'{home_directory}cities_lat_long.json', 'r') as f:
+with open('data/cities_lat_long.json', 'r') as f:
     city_long_lat = json.load(f)
 
 city_long_lat = pd.DataFrame(city_long_lat).drop(columns = ["counties"])
@@ -44,4 +42,5 @@ for zz in range(city_long_lat.shape[0]):
     all_data[plaka] = data2
 
 final_data = pd.concat(all_data, ignore_index=True)
-final_data.to_parquet(f"{home_directory}weather_data.parquet")
+final_data.to_parquet("data/weather_data.parquet")
+final_data = pd.read_parquet("data/weather_data.parquet")
