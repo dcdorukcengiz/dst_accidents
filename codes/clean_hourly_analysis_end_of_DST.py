@@ -54,7 +54,8 @@ assign(**{"placebo_two_weeks_after_change": lambda x:
     
     }).
 assign(**{"accident_time": lambda x: x["kazatarihi_full"].dt.time}).
-assign(**{"accident_date": lambda x: x["kazatarihi_full"].dt.date})
+assign(**{"accident_date": lambda x: x["kazatarihi_full"].dt.date}).
+assign(**{"accident_hour": lambda x: x["kazatarihi_full"].dt.hour})
 
 )
 
@@ -62,17 +63,30 @@ assign(**{"accident_date": lambda x: x["kazatarihi_full"].dt.date})
 all_time_changes = pd.DataFrame({"year": list(range(2013,2016)) + list(range(2017, 2020)), 
                                 "t0" : ["2013-10-27", "2014-10-26", "2015-11-08", "2017-10-29", "2018-10-28", "2019-11-03"]}
 ).assign(**{"t0": lambda x: pd.to_datetime(x["t0"]).dt.date})
-                                
+
+
+#Need to make combined accidents balanced first!
+to_balance_data = (combined_accidents_cleaner_w_dst[["accident_date"]].drop_duplicates(). 
+        merge(combined_accidents_cleaner_w_dst[["accident_hour"]].drop_duplicates(), how = "cross").
+        merge(combined_accidents_cleaner_w_dst[["kaza_ili"]].drop_duplicates(), how = "cross")
+        )
+
 
 federal_holidays = pd.read_parquet("data/federal_holidays_turkey_table.parquet").rename(columns = {"date": "accident_date"}).assign(**{"accident_date": lambda x: pd.to_datetime(x["accident_date"]).dt.date   })
-combined_accidents_cleaner_w_dst_w_holidays = combined_accidents_cleaner_w_dst.merge(federal_holidays, on = "accident_date", how = "left")
-zoomed_in_data_agg = (combined_accidents_cleaner_w_dst_w_holidays.query("two_weeks_before_after_change == True and kazatarihi_full.dt.month > 6").
+
+zoomed_in_data_agg = (combined_accidents_cleaner_w_dst.query("two_weeks_before_after_change == True and kazatarihi_full.dt.month > 6"))
+
+
+balanced_zoomed_in_data_agg = (balanced_zoomed_in_data_agg.
     merge(all_time_changes, left_on = ["kazayili"], right_on = ["year"] ).
-    assign(**{"day_distance": lambda x: (pd.to_datetime(x["accident_date"]) - pd.to_datetime(x["t0"])).dt.days})
+    assign(**{"day_distance": lambda x: (pd.to_datetime(x["accident_date"]) - pd.to_datetime(x["t0"])).dt.days}).
+    assign(**{"day_of_the_week": lambda x: pd.to_datetime(x["accident_date"]).dt.day_name()}).
+    assign(**{"week": lambda x: pd.to_datetime(x["accident_date"]).dt.isocalendar().week})
 )
 
 
-zoomed_in_data_agg.info()
+
+
 
 all_estimates = pd.DataFrame()
 for start_hour in range(0, 24, hour_range):
