@@ -12,14 +12,14 @@ import matplotlib.ticker as ticker
 import matplotlib.dates as mdates
 
 
-home_directory = "/Users/EzgilovesDoruk/Desktop/education_health/"
-combined_accidents_cleaner = pd.read_parquet(f"{home_directory}combined_accidents_cleaner_table.parquet")
+
+combined_accidents_cleaner = pd.read_parquet("data/combined_accidents_cleaner_table.parquet")
 weather_data = (pd.read_parquet("data/weather_data.parquet")[["time", "tavg", "kaza_ili"]].drop_duplicates().
             assign(**{"date": lambda x: x["time"].dt.date}).
             assign(**{"kaza_ili": lambda x: x["kaza_ili"].astype(int)})
 )
 
-federal_holidays = pd.read_parquet(f"{home_directory}federal_holidays_turkey_table.parquet").rename(columns = {"date": "kazatarihi_date"})
+federal_holidays = pd.read_parquet(f"data/federal_holidays_turkey_table.parquet").rename(columns = {"date": "kazatarihi_date"})
 
 
 #Balanced data. The panel axis is city-hourly and the time is year.
